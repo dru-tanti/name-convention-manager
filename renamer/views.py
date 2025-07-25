@@ -71,13 +71,13 @@ class Window(QWidget, Ui_Form):
 
     def _runRenamerThread(self):
         fileNames = []
-        assetType = self._assetTypeData[self.assetTypeIndex]["convention"]
-        assetSubType = self._assetTypeData[self.assetTypeIndex]["subTypes"][self.assetSubTypeIndex]["convention"]
+        assetTypeName = self._assetTypeData[self.assetTypeIndex]["convention"]
+        assetSubTypeName = self._assetTypeData[self.assetTypeIndex]["subTypes"][self.assetSubTypeIndex]["convention"]
         # Since all the names are stored in a table need to do an additional loop to prepare the names
         for index, file in enumerate(self._files):
             fileNames.append("_".join([
-                assetType,
-                assetSubType,
+                assetTypeName,
+                assetSubTypeName,
                 self.tableWidget.item(index, 1).text(), # name
                 self.tableWidget.item(index, 2).text(), # variant
                 self.tableWidget.item(index, 3).text(), # descriptor
