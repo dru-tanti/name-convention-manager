@@ -1,0 +1,24 @@
+[
+    {
+        "name": "Character Concept",
+        "convention": "Char",
+        "subTypes": [
+            {
+                "name": "StaticMesh",
+                "convention": "SM"
+            },
+            {
+                "name": "Texture",
+                "convention": "TX"
+            }
+        ]
+    },
+    {
+        "name": "Character Model",
+        "convention": "CharMod",
+        "subTypes": [{
+            "name": "StaticMesh",
+            "convention": "SM"
+        }]
+    }
+]
