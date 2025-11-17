@@ -17,7 +17,6 @@ class Window(QWidget, Ui_Form):
     def __init__(self):
         super().__init__()
         self._files = deque()
-        self._filesCount = len(self._files)
         self._setupUI()
         self._connectSignalsSlots()
 
@@ -34,9 +33,19 @@ class Window(QWidget, Ui_Form):
         self._loadAssetTypes()
         self._setAssetTypeInput()
         self._setAssetSubTypeInput(self.assetTypeIndex)
+        self._updateStateWhenNoFiles()
         # Register the change events
         self.assetTypeInput.currentIndexChanged.connect(self._assetTypeChanged)
         self.subTypeInput.currentIndexChanged.connect(self._assetSubTypeChanged)
+    
+    def _updateStateWhenNoFiles(self):
+        self._filesCount = len(self._files)
+        self.browseButton.setEnabled(True)
+        self.browseButton.setFocus(True)
+        self.startRenameButton.setEnabled(False)
+        self.tableWidget.clearContents()
+        self.tableWidget.setRowCount(0)
+
 
     def _assetTypeChanged(self, index):
         self.assetTypeIndex = index
@@ -93,9 +102,11 @@ class Window(QWidget, Ui_Form):
         self._thread.started.connect(self._renamer.renameFiles)
         # Update state
         self._renamer.renamedFile.connect(self._updateStateWhenFileRenamed)
+        self._renamer.progressed.connect(self._updateProgressBar)
         # Clean up
         self._renamer.finished.connect(self._thread.quit)
         self._renamer.finished.connect(self._renamer.deleteLater)
+        self._renamer.finished.connect(self._updateStateWhenNoFiles)
         self._thread.finished.connect(self._thread.deleteLater)
         # Run the thread
         self._thread.start()
@@ -104,10 +115,12 @@ class Window(QWidget, Ui_Form):
         self._files.popleft()
         self.oldNameList.addItem(str(originalFile))
         self.newNameList.addItem(str(newFile))
+    
+    def _updateProgressBar(self, fileNumber):
+        progressPercent = int(fileNumber / self._filesCount * 100)
+        self.progressBar.setValue(progressPercent)
 
     def loadFiles(self):
-        print(self.assetTypeIndex)
-        print(self.assetSubTypeIndex)
         # Reset the table
         self._files.clear()
         self.tableWidget.clearContents()
@@ -126,5 +139,13 @@ class Window(QWidget, Ui_Form):
             for index, file in enumerate(files):
                 self._files.append(Path(file))
                 self.tableWidget.insertRow(index)
-                test = self.tableWidget.setItem(index, 0, QTableWidgetItem(str(Path(file).name)))
+                self.tableWidget.setItem(index, 0, QTableWidgetItem(str(Path(file).name)))
             self._filesCount = len(self._files)
+
+    # Empty method in case we want to do stuff when files are loaded
+    def _updateStateWhenFilesLoaded(self):
+        self
+
+    def _updateStateWhenReady(self):
+        # Check every newName field in the table to make sure that it's filled.
+        self.startRenameButton.setEnabled(True)
